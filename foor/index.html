@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gonsiori – Vesivärava foorid</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Gonsiori – Vesivärava ristmik</h1>
+  <span class="sub">Fooride simulatsioon · füüsilised foorid A ja B (Arduino), jalakäijate foorid J1–J3 (veeb)</span>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>Ristmik</h2>
+    <div class="map" id="map">
+      <div class="road-h"></div>
+      <div class="road-v"></div>
+      <div class="center"></div>
+      
+      <!-- ülekäigurajad -->
+      <div class="zebra v" style="left:28%; top:38%; width:8%; height:24%"></div>  <!-- J1: üle Vesivärava (läänes) -->
+      <div class="zebra"   style="left:40%; top:64%; width:20%; height:7%"></div>  <!-- J2: üle Gonsiori (lõunas) -->
+      <div class="zebra v" style="left:64%; top:38%; width:8%; height:24%"></div>  <!-- J3: üle Vesivärava (idas) -->
+      <span class="label" style="left:3%; top:39%">Gonsiori</span>
+      <span class="label" style="left:41%; top:3%; writing-mode: vertical-rl">Vesivärava</span>
+
+      <!-- Autode foorid: A1 ja A2 = sama grupp (füüsiline foor 1), B = füüsiline foor 2 -->
+      <div class="tl" id="tl-A1" style="left:20%; top:63%"><div class="lamp r"></div><div class="lamp y"></div><div class="lamp g"></div><div class="name">A</div></div>
+      <div class="tl" id="tl-A2" style="left:75%; top:22%"><div class="lamp r"></div><div class="lamp y"></div><div class="lamp g"></div><div class="name">A</div></div>
+      <div class="tl" id="tl-B"  style="left:62%; top:74%"><div class="lamp r"></div><div class="lamp y"></div><div class="lamp g"></div><div class="name">B</div></div>
+
+      <!-- Jalakäijate foorid kaardil -->
+      <div class="pl" id="map-J1" style="left:29%; top:24%"><div class="lamp r">🧍</div><div class="lamp g">🚶</div><div class="name">J1</div></div>
+      <div class="pl" id="map-J2" style="left:30%; top:72%"><div class="lamp r">🧍</div><div class="lamp g">🚶</div><div class="name">J2</div></div>
+      <div class="pl" id="map-J3" style="left:65%; top:63%"><div class="lamp r">🧍</div><div class="lamp g">🚶</div><div class="name">J3</div></div>
+    </div>
+    <p class="note">Skeem on lihtsustatud. Fooride ja ülekäikude asukohti saab muuta HTML-is (style="left/top").</p>
+  </section>
+
+  <section style="display:grid; gap:20px; align-content:start">
+    <div class="panel">
+      <h2>Olek</h2>
+      <dl class="status">
+        <dt>Kell</dt><dd id="clock">–</dd>
+        <dt>Režiim</dt><dd id="modeName">–</dd>
+        <dt>Faas</dt><dd id="phaseName">–</dd>
+        <dt>Faasi lõpuni</dt><dd id="remaining">–</dd>
+      </dl>
+      <div class="row" id="modeButtons">
+        <button data-mode="auto">Automaatne (kell)</button>
+        <button data-mode="morning">Hommik</button>
+        <button data-mode="evening">Õhtu</button>
+        <button data-mode="night">Öö</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Jalakäijad</h2>
+      <div class="peds" id="peds"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Arduino ühendus</h2>
+      <div class="row" style="margin-top:0; align-items:center">
+        <button class="primary" id="connectBtn">Ühenda Arduino</button>
+        <span class="conn"><span class="dot" id="connDot"></span><span id="connText">Ühendamata (simulatsioon töötab ka ilma)</span></span>
+      </div>
+      <div class="row">
+        <div class="log" id="log" style="width:100%"></div>
+      </div>
+      <p class="note">→ veebist Arduinole · ← Arduinost veebile · ● sündmus veebis. Logi sobib andmete liikumise skeemi näideteks.</p>
+    </div>
+  </section>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
