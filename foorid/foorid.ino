@@ -1,0 +1,141 @@
+/*
+  Gonsiori – Vesivärava ristmiku foorid (Arduino osa)
+
+  Arduino on "täitja": kogu loogika (faasid, režiimid, jalakäijate nupud)
+  on veebilehel. Veebileht saadab USB (Serial, 9600 baud) kaudu käske,
+  Arduino süütab füüsiliste fooride tuled ja saadab kinnituse.
+
+  Sõnumid veebilt (üks JSON rida, lõpus \n):
+    {"A":"G","B":"R"}     -> foorigruppide olek (R, Y, G, RY, OFF)
+    {"mode":"night"}      -> öörežiim, Arduino vilgutab ise kollast
+
+  Sõnumid Arduinolt:
+    {"ready":1}                 -> Arduino käivitus
+    {"ack":"A:G,B:R"}           -> uus olek võeti kasutusele
+    {"ack":"mode:night"}        -> öörežiim sisse lülitatud
+    {"warn":"timeout"}          -> side katkes, ohutuse mõttes kollane vilkur
+    {"err":"..."}               -> vigane / ohtlik käsk, ei täidetud
+
+  Ühendused (igal LED-il 220 oomi takisti):
+    Foor A1 (grupp A):  pin 9 punane,  pin 8 kollane,  pin 7 roheline   (vana leivalaud)
+    Foor A2 (grupp A):  pin 2 punane,  pin 3 kollane,  pin 4 roheline   (sama tsükkel mis A1)
+    Foor B  (grupp B):  pin 10 punane, pin 11 kollane, pin 12 roheline
+    Pinnid 5 ja 6 = vana jalakäija foor, seda koodi ei kasuta (jääb kustu).
+    Kõigi LED-ide lühike jalg -> GND.
+*/
+
+const int A_R  = 9,  A_Y  = 8,  A_G  = 7;   // foor A1 (vana leivalaud)
+const int A2_R = 2,  A2_Y = 3,  A2_G = 4;   // foor A2 (näitab alati sama mis A1)
+const int B_R  = 10, B_Y  = 11, B_G  = 12;  // foor B
+
+const unsigned long TIMEOUT_MS = 5000;  // kui nii kaua sõnumeid ei tule -> kollane vilkur
+const unsigned long BLINK_MS = 1000;    // kollase vilkuri pool-periood
+
+String aState = "OFF";
+String bState = "OFF";
+bool nightMode = true;                  // kuni veebileht pole ühendunud, vilgub kollane
+unsigned long lastMsg = 0;
+String inputBuf = "";
+
+// Lülitab ühe foori tuled vastavalt olekule
+void setLight(int r, int y, int g, const String &s) {
+  digitalWrite(r, (s == "R" || s == "RY") ? HIGH : LOW);
+  digitalWrite(y, (s == "Y" || s == "RY") ? HIGH : LOW);
+  digitalWrite(g, (s == "G") ? HIGH : LOW);
+}
+
+void applyStates() {
+  setLight(A_R, A_Y, A_G, aState);
+  setLight(A2_R, A2_Y, A2_G, aState);
+  setLight(B_R, B_Y, B_G, bState);
+}
+
+// Võtab lihtsast JSON-ist väärtuse: {"A":"G"} -> getValue(msg, "A") == "G"
+String getValue(const String &msg, const String &key) {
+  String pattern = "\"" + key + "\":\"";
+  int start = msg.indexOf(pattern);
+  if (start < 0) return "";
+  start += pattern.length();
+  int end = msg.indexOf('"', start);
+  if (end < 0) return "";
+  return msg.substring(start, end);
+}
+
+bool validState(const String &s) {
+  return s == "R" || s == "Y" || s == "G" || s == "RY" || s == "OFF";
+}
+
+void handleMessage(const String &msg) {
+  lastMsg = millis();
+
+  String mode = getValue(msg, "mode");
+  if (mode == "night") {
+    if (!nightMode) Serial.println("{\"ack\":\"mode:night\"}");
+    nightMode = true;
+    return;
+  }
+
+  String a = getValue(msg, "A");
+  String b = getValue(msg, "B");
+  if (a.length() == 0 || b.length() == 0) return;  // tundmatu sõnum
+
+  if (!validState(a) || !validState(b)) {
+    Serial.println("{\"err\":\"tundmatu olek\"}");
+    return;
+  }
+  // Ohutuskontroll: A ja B ei tohi kunagi korraga rohelised olla
+  if (a == "G" && b == "G") {
+    Serial.println("{\"err\":\"A ja B ei tohi korraga rohelised olla\"}");
+    return;
+  }
+
+  bool changed = nightMode || a != aState || b != bState;
+  nightMode = false;
+  aState = a;
+  bState = b;
+  applyStates();
+  if (changed) {
+    Serial.print("{\"ack\":\"A:");
+    Serial.print(aState);
+    Serial.print(",B:");
+    Serial.print(bState);
+    Serial.println("\"}");
+  }
+}
+
+void setup() {
+  int pins[] = {A_R, A_Y, A_G, A2_R, A2_Y, A2_G, B_R, B_Y, B_G};
+  for (int i = 0; i < 9; i++) pinMode(pins[i], OUTPUT);
+  // Vana kodutöö jalakäija foor (pinnid 5 ja 6) – hoiame kindlalt kustus
+  pinMode(5, OUTPUT); digitalWrite(5, LOW);
+  pinMode(6, OUTPUT); digitalWrite(6, LOW);
+  Serial.begin(9600);
+  Serial.println("{\"ready\":1}");
+}
+
+void loop() {
+  // Loeme sissetulevad märgid reahaaval
+  while (Serial.available() > 0) {
+    char c = Serial.read();
+    if (c == '\n') {
+      inputBuf.trim();
+      if (inputBuf.length() > 0) handleMessage(inputBuf);
+      inputBuf = "";
+    } else if (inputBuf.length() < 100) {
+      inputBuf += c;
+    }
+  }
+
+  // Ohutus: kui veebileht vaikib, läheme kollasele vilkurile
+  if (!nightMode && millis() - lastMsg > TIMEOUT_MS) {
+    nightMode = true;
+    Serial.println("{\"warn\":\"timeout\"}");
+  }
+
+  if (nightMode) {
+    bool on = (millis() / BLINK_MS) % 2 == 0;
+    setLight(A_R, A_Y, A_G, on ? "Y" : "OFF");
+    setLight(A2_R, A2_Y, A2_G, on ? "Y" : "OFF");
+    setLight(B_R, B_Y, B_G, on ? "Y" : "OFF");
+  }
+}

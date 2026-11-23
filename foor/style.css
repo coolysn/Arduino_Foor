@@ -1,0 +1,106 @@
+  :root {
+    --bg: #f4f2ee; --panel: #ffffff; --ink: #1d1d1f; --muted: #6b6b70;
+    --road: #3a3a3e; --line: #f4f2ee; --walk: #e9e6df;
+    --red: #e5322d; --yellow: #f5b70a; --green: #19b85a; --off: #2b2b2f;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 16px 24px; display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  header h1 { margin: 0; font-size: 20px; }
+  header .sub { color: var(--muted); font-size: 14px; }
+  main { display: grid; grid-template-columns: minmax(420px, 640px) minmax(300px, 1fr);
+         gap: 20px; padding: 0 24px 24px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .panel { background: var(--panel); border-radius: 14px; padding: 16px;
+           box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .05em;
+       color: var(--muted); margin: 0 0 10px; }
+
+  /* Ristmiku skeem */
+  .map { position: relative; width: 100%; aspect-ratio: 1 / 1; background: #cfd8c4;
+         border-radius: 12px; overflow: hidden; }
+  .road-h, .road-v { position: absolute; background: var(--road); }
+  .road-h { left: 0; right: 0; top: 38%; height: 24%; }
+  .road-v { top: 0; bottom: 0; left: 40%; width: 20%; }
+  .road-h::after { content: ""; position: absolute; left: 0; right: 0; top: 50%;
+                   border-top: 2px dashed var(--line); opacity: .6; }
+  .road-v::after { content: ""; position: absolute; top: 0; bottom: 0; left: 50%;
+                   border-left: 2px dashed var(--line); opacity: .6; }
+  .center { position: absolute; left: 40%; top: 38%; width: 20%; height: 24%; background: var(--road); z-index: 1; }
+  .zebra { position: absolute; z-index: 2;
+           background: repeating-linear-gradient(90deg, var(--walk) 0 6px, transparent 6px 12px); }
+  .zebra.v { background: repeating-linear-gradient(0deg, var(--walk) 0 6px, transparent 6px 12px); }
+  .label { position: absolute; color: #fff; font-size: 12px; font-weight: 600; z-index: 3;
+           letter-spacing: .08em; text-transform: uppercase; }
+
+  /* Autode foor */
+  .tl { position: absolute; z-index: 4; display: flex; flex-direction: column; gap: 3px;
+        background: #111; padding: 4px; border-radius: 6px; }
+  .tl .lamp { width: 16px; height: 16px; border-radius: 50%; background: var(--off); }
+  .tl .r.on { background: var(--red); box-shadow: 0 0 8px var(--red); }
+  .tl .y.on { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }
+  .tl .g.on { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .tl .name { color: #fff; font-size: 10px; text-align: center; font-weight: 700; }
+
+  /* Jalakäijate foor kaardil */
+  .pl { position: absolute; z-index: 4; display: flex; flex-direction: column; gap: 3px;
+        background: #111; padding: 4px; border-radius: 6px; align-items: center; }
+  .pl .lamp { width: 18px; height: 18px; border-radius: 4px; background: var(--off);
+              display: grid; place-items: center; font-size: 12px; }
+  .pl .r.on { background: var(--red); }
+  .pl .g.on { background: var(--green); }
+  .pl .name { color: #fff; font-size: 10px; font-weight: 700; }
+
+  /* Juhtpaneel */
+  .status { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 15px; }
+  .status dt { color: var(--muted); }
+  .status dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  button { font: inherit; font-size: 14px; border: 1px solid #d0cdc6; background: #fff;
+           border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+  button:hover { background: #f0eee9; }
+  button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+  button.primary { background: #1f5eff; color: #fff; border-color: #1f5eff; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .peds { display: grid; gap: 10px; }
+  .ped { display: grid; grid-template-columns: 70px 1fr auto; align-items: center; gap: 12px;
+         padding: 10px; border: 1px solid #ebe8e2; border-radius: 10px; }
+  .ped .big { display: flex; gap: 4px; background: #111; padding: 5px; border-radius: 6px; width: max-content; }
+  .ped .big .lamp { width: 26px; height: 26px; border-radius: 5px; background: var(--off);
+                    display: grid; place-items: center; font-size: 16px; }
+  .ped .big .r.on { background: var(--red); }
+  .ped .big .g.on { background: var(--green); }
+  .ped .info { font-size: 13px; color: var(--muted); }
+  .ped .info b { color: var(--ink); }
+  .wait { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 4px;
+          background: var(--yellow); color: #000; font-size: 11px; font-weight: 700; visibility: hidden; }
+  .wait.on { visibility: visible; }
+  .conn { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #bbb; }
+  .dot.ok { background: var(--green); }
+  .log { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; height: 220px;
+         overflow-y: auto; background: #18181b; color: #e4e4e7; border-radius: 8px; padding: 8px; }
+  .log .out { color: #93c5fd; } .log .in { color: #86efac; } .log .ev { color: #fcd34d; }
+  .log .err { color: #fca5a5; }
+  .note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+/* Liikumissuuna nooled */
+.flow { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
+.flow g { opacity: 0; transition: opacity .3s; }
+.flow g.show { opacity: 1; }
+.flow g path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.flow .car path { stroke: #19b85a; stroke-width: 1.6; stroke-dasharray: 4 2.5; }
+.flow .ped path { stroke: #ffffff; stroke-width: 1.1; }
+@media (prefers-reduced-motion: no-preference) {
+  .flow g.show.car path { animation: flowmove 0.8s linear infinite; }
+}
+@keyframes flowmove { to { stroke-dashoffset: -6.5; } }
+
+/* Jalakäija ikoonid: lamp jääb mustaks, mehike süttib punaseks/roheliseks nagu päris fooril */
+.lamp .ico { width: 80%; height: 90%; color: #4a4a50; display: block; }
+.pl .lamp.r.on, .pl .lamp.g.on,
+.ped .big .lamp.r.on, .ped .big .lamp.g.on { background: var(--off); }
+.lamp.r.on .ico { color: #ff3b30; }
+.lamp.g.on .ico { color: #2bd66f; }
+.lamp.g .ico { transform: ScaleX(-1)}

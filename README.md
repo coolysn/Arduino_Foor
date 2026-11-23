@@ -1,6 +1,25 @@
 # Arduino_Foor
 Internet of Things final project - Traffic simulation.
 
+![Ristmik](ristmik.png)
+
+FAILID
+- foorid/foorid.ino – Arduino kood (laadi Arduino IDE-ga plaadile)
+- foor/index.html, foor/style.css, foor/script.js – veebileht (ava Chrome'is)
+- ristmik.png / ristmik.svg – ristmiku skeem fooride nimedega
+
+ARDUINO ÜHENDUSED (igal LED-il 220 Ω takisti, lühike jalg → GND)
+- A1 (Gonsiori, läänest): pin 9 punane, 8 kollane, 7 roheline (vana leivalaud)
+- A2 (Gonsiori, idast):   pin 2 punane, 3 kollane, 4 roheline
+- B  (Vesivärava, lõunast): pin 10 punane, 11 kollane, 12 roheline
+- Pinnid 5 ja 6: vana kodutöö jalakäija foor, seda projekti kood ei kasuta
+- A1 ja A2 näitavad alati sama tuld (grupp A)
+
+JALAKÄIJAD (veebis)
+- J1: üle Vesivärava (põhjas), roheline koos A-ga
+- J2: üle Gonsiori (läänes), roheline koos B-ga
+- J3: üle Vesivärava (lõunas), roheline koos A-ga
+
 AJASTUS JA REŽIIMID
 
 ÜLDREEGLID (kõigis režiimides)

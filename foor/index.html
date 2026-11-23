@@ -7,9 +7,28 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<!-- Jalakäija ikoonid (seisev ja kõndiv mehike). Kasutatakse: <svg class="ico"><use href="#ico-seis"/></svg> -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="ico-seis" viewBox="0 0 24 32">
+    <circle cx="12" cy="4" r="3.3" fill="currentColor"/>
+    <rect x="8" y="8.6" width="8" height="11.5" rx="2" fill="currentColor"/>
+    <rect x="4.8" y="9" width="2.6" height="10" rx="1.3" fill="currentColor"/>
+    <rect x="16.6" y="9" width="2.6" height="10" rx="1.3" fill="currentColor"/>
+    <rect x="8.4" y="19" width="3.1" height="12" rx="1.5" fill="currentColor"/>
+    <rect x="12.5" y="19" width="3.1" height="12" rx="1.5" fill="currentColor"/>
+  </symbol>
+  <symbol id="ico-kond" viewBox="0 0 24 32">
+    <circle cx="13.5" cy="4" r="3.3" fill="currentColor"/>
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M13 9.5 L11.5 19" stroke-width="5"/>
+      <path d="M12.8 11.5 L8 17 M12.8 11.5 L17.5 15.5" stroke-width="2.8"/>
+      <path d="M11.5 19 L7 30 M11.5 19 L16 24.5 L18 30.5" stroke-width="3.2"/>
+    </g>
+  </symbol>
+</svg>
 <header>
   <h1>Gonsiori – Vesivärava ristmik</h1>
-  <span class="sub">Fooride simulatsioon · füüsilised foorid A ja B (Arduino), jalakäijate foorid J1–J3 (veeb)</span>
+  <span class="sub">Fooride simulatsioon · füüsilised foorid A1, A2 ja B (Arduino), jalakäijate foorid J1–J3 (veeb)</span>
 </header>
 
 <main>
@@ -19,23 +38,46 @@
       <div class="road-h"></div>
       <div class="road-v"></div>
       <div class="center"></div>
-      
+
+      <!-- Liikumissuuna nooled: näha ainult siis, kui vastav foor on roheline -->
+      <svg class="flow" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <marker id="hCar" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="3" markerHeight="3" orient="auto"><path d="M0 0L10 5L0 10z" fill="#19b85a"/></marker>
+          <marker id="hPed" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="3.2" markerHeight="3.2" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#ffffff"/></marker>
+        </defs>
+        <!-- Grupp A: A1 läänest itta, A2 idast läände (otse + parempööre) -->
+        <g id="flow-A" class="car">
+          <path d="M14 55 H84" marker-end="url(#hCar)"/>
+          <path d="M30 55 Q45 55 45 70 V82" marker-end="url(#hCar)"/>
+          <path d="M86 45 H16" marker-end="url(#hCar)"/>
+          <path d="M70 45 Q55 45 55 30 V18" marker-end="url(#hCar)"/>
+        </g>
+        <!-- Grupp B: Vesivärava lõunast põhja (otse + parempööre) -->
+        <g id="flow-B" class="car">
+          <path d="M55 86 V16" marker-end="url(#hCar)"/>
+          <path d="M55 72 Q55 55 70 55 H84" marker-end="url(#hCar)"/>
+        </g>
+        <!-- Jalakäijad: kahesuunaline nool üle ülekäigu -->
+        <g id="flow-J1" class="ped"><path d="M42 31.5 H58" marker-start="url(#hPed)" marker-end="url(#hPed)"/></g>
+        <g id="flow-J2" class="ped"><path d="M32 40 V60" marker-start="url(#hPed)" marker-end="url(#hPed)"/></g>
+        <g id="flow-J3" class="ped"><path d="M42 68.5 H58" marker-start="url(#hPed)" marker-end="url(#hPed)"/></g>
+      </svg>
       <!-- ülekäigurajad -->
-      <div class="zebra v" style="left:28%; top:38%; width:8%; height:24%"></div>  <!-- J1: üle Vesivärava (läänes) -->
-      <div class="zebra"   style="left:40%; top:64%; width:20%; height:7%"></div>  <!-- J2: üle Gonsiori (lõunas) -->
-      <div class="zebra v" style="left:64%; top:38%; width:8%; height:24%"></div>  <!-- J3: üle Vesivärava (idas) -->
+      <div class="zebra"   style="left:40%; top:28%; width:20%; height:7%"></div>  <!-- J1: üle Vesivärava (põhja pool) -->
+      <div class="zebra v" style="left:28%; top:38%; width:8%; height:24%"></div>  <!-- J2: üle Gonsiori (lääne pool) -->
+      <div class="zebra"   style="left:40%; top:65%; width:20%; height:7%"></div>  <!-- J3: üle Vesivärava (lõuna pool) -->
       <span class="label" style="left:3%; top:39%">Gonsiori</span>
       <span class="label" style="left:41%; top:3%; writing-mode: vertical-rl">Vesivärava</span>
 
-      <!-- Autode foorid: A1 ja A2 = sama grupp (füüsiline foor 1), B = füüsiline foor 2 -->
-      <div class="tl" id="tl-A1" style="left:20%; top:63%"><div class="lamp r"></div><div class="lamp y"></div><div class="lamp g"></div><div class="name">A</div></div>
-      <div class="tl" id="tl-A2" style="left:75%; top:22%"><div class="lamp r"></div><div class="lamp y"></div><div class="lamp g"></div><div class="name">A</div></div>
-      <div class="tl" id="tl-B"  style="left:62%; top:74%"><div class="lamp r"></div><div class="lamp y"></div><div class="lamp g"></div><div class="name">B</div></div>
+      <!-- Autode foorid: A1 ja A2 = grupp A (sama tsükkel), B = grupp B -->
+      <div class="tl" id="tl-A1" style="left:20%; top:64%"><div class="lamp r"></div><div class="lamp y"></div><div class="lamp g"></div><div class="name">A1</div></div>
+      <div class="tl" id="tl-A2" style="left:74%; top:21%"><div class="lamp r"></div><div class="lamp y"></div><div class="lamp g"></div><div class="name">A2</div></div>
+      <div class="tl" id="tl-B"  style="left:62%; top:75%"><div class="lamp r"></div><div class="lamp y"></div><div class="lamp g"></div><div class="name">B</div></div>
 
       <!-- Jalakäijate foorid kaardil -->
-      <div class="pl" id="map-J1" style="left:29%; top:24%"><div class="lamp r">🧍</div><div class="lamp g">🚶</div><div class="name">J1</div></div>
-      <div class="pl" id="map-J2" style="left:30%; top:72%"><div class="lamp r">🧍</div><div class="lamp g">🚶</div><div class="name">J2</div></div>
-      <div class="pl" id="map-J3" style="left:65%; top:63%"><div class="lamp r">🧍</div><div class="lamp g">🚶</div><div class="name">J3</div></div>
+      <div class="pl" id="map-J1" style="left:62%; top:24%"><div class="lamp r"><svg class="ico"><use href="#ico-seis"/></svg></div><div class="lamp g"><svg class="ico"><use href="#ico-kond"/></svg></div><div class="name">J1</div></div>
+      <div class="pl" id="map-J2" style="left:29%; top:23%"><div class="lamp r"><svg class="ico"><use href="#ico-seis"/></svg></div><div class="lamp g"><svg class="ico"><use href="#ico-kond"/></svg></div><div class="name">J2</div></div>
+      <div class="pl" id="map-J3" style="left:33%; top:65%"><div class="lamp r"><svg class="ico"><use href="#ico-seis"/></svg></div><div class="lamp g"><svg class="ico"><use href="#ico-kond"/></svg></div><div class="name">J3</div></div>
     </div>
     <p class="note">Skeem on lihtsustatud. Fooride ja ülekäikude asukohti saab muuta HTML-is (style="left/top").</p>
   </section>
@@ -52,6 +94,7 @@
       <div class="row" id="modeButtons">
         <button data-mode="auto">Automaatne (kell)</button>
         <button data-mode="morning">Hommik</button>
+        <button data-mode="day">Päev</button>
         <button data-mode="evening">Õhtu</button>
         <button data-mode="night">Öö</button>
       </div>
