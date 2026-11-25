@@ -8,12 +8,12 @@ FAILID
 - foor/index.html, foor/style.css, foor/script.js – veebileht (ava Chrome'is)
 - ristmik.png / ristmik.svg – ristmiku skeem fooride nimedega
 
-ARDUINO ÜHENDUSED (igal LED-il 220 Ω takisti, lühike jalg → GND)
-- A1 (Gonsiori, läänest): pin 9 punane, 8 kollane, 7 roheline (vana leivalaud)
-- A2 (Gonsiori, idast):   pin 2 punane, 3 kollane, 4 roheline
-- B  (Vesivärava, lõunast): pin 10 punane, 11 kollane, 12 roheline
-- Pinnid 5 ja 6: vana kodutöö jalakäija foor, seda projekti kood ei kasuta
-- A1 ja A2 näitavad alati sama tuld (grupp A)
+ARDUINO ÜHENDUSED (fooriLED-moodulid, leivalaua kaudu)
+- Moodul A (grupp A, näitab A1 ja A2): R → a12 → e12 → pin 9, Y → a13 → e13 → pin 8, G → a14 → e14 → pin 7
+- Moodul B (grupp B, Vesivärava):      R → a3 → e3 → pin 10,  Y → a4 → e4 → pin 11,   G → a5 → e5 → pin 12
+- Mõlema mooduli GND → leivalaua sinine (−) rada → Arduino GND
+- Pinnid 2, 3, 4 (A2) on varuks, füüsilist moodulit pole
+- Kontroll: pärast üleslaadimist ja ühendamist peab veebi logis olema ← {"ready":1,"v":"2026-11-23"}
 
 JALAKÄIJAD (veebis)
 - J1: üle Vesivärava (põhjas), roheline koos A-ga

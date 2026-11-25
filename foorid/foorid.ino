@@ -10,23 +10,25 @@
     {"mode":"night"}      -> öörežiim, Arduino vilgutab ise kollast
 
   Sõnumid Arduinolt:
-    {"ready":1}                 -> Arduino käivitus
+    {"ready":1,"v":"2026-11-23"} -> Arduino käivitus + koodi versioon
     {"ack":"A:G,B:R"}           -> uus olek võeti kasutusele
     {"ack":"mode:night"}        -> öörežiim sisse lülitatud
     {"warn":"timeout"}          -> side katkes, ohutuse mõttes kollane vilkur
     {"err":"..."}               -> vigane / ohtlik käsk, ei täidetud
 
-  Ühendused (igal LED-il 220 oomi takisti):
-    Foor A1 (grupp A):  pin 9 punane,  pin 8 kollane,  pin 7 roheline   (vana leivalaud)
-    Foor A2 (grupp A):  pin 2 punane,  pin 3 kollane,  pin 4 roheline   (sama tsükkel mis A1)
-    Foor B  (grupp B):  pin 10 punane, pin 11 kollane, pin 12 roheline
-    Pinnid 5 ja 6 = vana jalakäija foor, seda koodi ei kasuta (jääb kustu).
-    Kõigi LED-ide lühike jalg -> GND.
+  Ühendused (fooriLED-moodulid, takistid on moodulil juba olemas):
+    Moodul A (grupp A, näitab A1 ja A2):  pin 9 = R,  pin 8 = Y,  pin 7 = G
+    Moodul B (grupp B):                   pin 10 = R, pin 11 = Y, pin 12 = G
+    Mõlema mooduli GND -> leivalaua sinine (−) rada -> Arduino GND.
+    Pinnid 2, 3, 4 = A2 jaoks varuks (füüsilist moodulit pole, võib jätta tühjaks).
+    Pinnid 5 ja 6 hoitakse kustus (vana kodutöö jalakäija foor).
 */
 
-const int A_R  = 9,  A_Y  = 8,  A_G  = 7;   // foor A1 (vana leivalaud)
-const int A2_R = 2,  A2_Y = 3,  A2_G = 4;   // foor A2 (näitab alati sama mis A1)
-const int B_R  = 10, B_Y  = 11, B_G  = 12;  // foor B
+const char* VERSIOON = "2026-11-23";      // muuda, kui koodi muudad – näed veebi logist, mis kood plaadil on
+
+const int A_R  = 9,  A_Y  = 8,  A_G  = 7;   // moodul A (grupp A)
+const int A2_R = 2,  A2_Y = 3,  A2_G = 4;   // A2 varuks, näitab alati sama mis A (moodulit pole)
+const int B_R  = 10, B_Y  = 11, B_G  = 12;  // moodul B (grupp B)
 
 const unsigned long TIMEOUT_MS = 5000;  // kui nii kaua sõnumeid ei tule -> kollane vilkur
 const unsigned long BLINK_MS = 1000;    // kollase vilkuri pool-periood
@@ -110,7 +112,9 @@ void setup() {
   pinMode(5, OUTPUT); digitalWrite(5, LOW);
   pinMode(6, OUTPUT); digitalWrite(6, LOW);
   Serial.begin(9600);
-  Serial.println("{\"ready\":1}");
+  Serial.print("{\"ready\":1,\"v\":\"");
+  Serial.print(VERSIOON);
+  Serial.println("\"}");
 }
 
 void loop() {

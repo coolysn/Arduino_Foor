@@ -90,7 +90,7 @@ function changeMode(newMode) {
   logLine("ev", `● režiim: ${CONFIG.modes[newMode].name}`);
   if (newMode === "night") {
     for (const j of pedIds) { state.requests[j] = false; state.pedActive[j] = false; }
-    send({ mode: "night" });
+    send(currentPacket());
   } else if (old === "night" || old === null) {
     startPhase(RESTART_PHASE);
   }
@@ -100,6 +100,12 @@ function changeMode(newMode) {
 function tick() {
   const m = currentMode();
   if (m !== state.mode) changeMode(m);
+
+  // Öörežiimis saadame Arduinole iga vilkumise muutuse (vaikselt, et logi ei täituks)
+  if (state.mode === "night" && writer) {
+    const p = currentPacket();
+    if (JSON.stringify(p) !== JSON.stringify(lastPacket)) send(p, true);
+  }
 
   if (state.mode !== "night") {
     const ph = PHASES[state.phaseIdx];
@@ -159,7 +165,7 @@ function render() {
   document.getElementById("remaining").textContent =
     night ? "–" : Math.max(0, state.phaseDur - elapsed()).toFixed(1) + " s";
 
-  const nightBlink = Math.floor(Date.now() / 1000) % 2 === 0; // sama rütm mis Arduinol
+  const nightBlink = nightOn(); // sama rütm, mida saadetakse Arduinole
   setCar(document.getElementById("tl-A1"), night ? "BLINK" : ph.A, nightBlink);
   setCar(document.getElementById("tl-A2"), night ? "BLINK" : ph.A, nightBlink);
   setCar(document.getElementById("tl-B"),  night ? "BLINK" : ph.B, nightBlink);
@@ -213,8 +219,11 @@ function logLine(cls, text) {
 let port = null, writer = null, reader = null, writeDone = null, readDone = null;
 let lastPacket = null;
 
+// Öörežiimis vilgutab veebileht ise: sama kell nagu ekraanil, nii on füüsiline foor sünkroonis
+const nightOn = () => Math.floor(Date.now() / 1000) % 2 === 0;
+
 function currentPacket() {
-  if (state.mode === "night") return { mode: "night" };
+  if (state.mode === "night") return nightOn() ? { A: "Y", B: "Y" } : { A: "OFF", B: "OFF" };
   const ph = PHASES[state.phaseIdx];
   return { A: ph.A, B: ph.B };
 }
